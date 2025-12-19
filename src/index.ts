@@ -49,6 +49,13 @@ interface BuildOptions {
    * the field will be repeated for each value (e.g. for multiple `@match` entries).
    */
   userscriptMeta?: Record<string, string | string[] | undefined>
+  /**
+   * Additional options to pass to esbuild.
+   */
+  esbuildOptions?: Omit<
+    esbuild.BuildOptions,
+    'entryPoints' | 'outfile' | 'bundle' | 'format' | 'logLevel'
+  >
 }
 
 export async function build(options: BuildOptions) {
@@ -91,19 +98,26 @@ export async function build(options: BuildOptions) {
     }
   }
 
+  const plugins = options.esbuildOptions?.plugins || []
+  if (options.copyOutDir) {
+    plugins.unshift(esbuildCopyOutDirPlugin(options.copyOutDir, name))
+  }
+
   const esbuildOptions: esbuild.BuildOptions = {
+    ...options.esbuildOptions,
     entryPoints: [path.resolve(rootDir, options.input)],
     outfile: path.resolve(rootDir, options.outDir, `${name}.user.js`),
     bundle: true,
     format: 'iife',
     logLevel: 'info',
     banner: {
-      js: userscriptMetaToString({
-        ...defaultUserscriptMeta,
-        ...options.userscriptMeta,
-      }),
+      js:
+        userscriptMetaToString({
+          ...defaultUserscriptMeta,
+          ...options.userscriptMeta,
+        }) + (options.esbuildOptions?.banner?.js || ''),
     },
-    plugins: options.copyOutDir ? [esbuildCopyOutDirPlugin(options.copyOutDir, name)] : undefined,
+    plugins,
   }
 
   if (options.watch) {

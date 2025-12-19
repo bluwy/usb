@@ -16,9 +16,9 @@ await build({
   copyOutDir: [getUserscriptManagerOutDir('Userscripts')],
   // Optional: enable watch mode by passing "dev" as a positional argument
   watch: process.argv[2] === 'dev',
+  // Custom userscript metadata, you may want to configure `namespace`, `match`,
+  // `icon`, `grant`, etc.
   userscriptMeta: {
-    // Custom userscript metadata, you may want to configure `namespace`, `match`,
-    // `icon`, `grant`, etc.
     grant: 'none',
   },
 })
