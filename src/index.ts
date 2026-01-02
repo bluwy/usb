@@ -4,7 +4,10 @@ import os from 'node:os'
 import path from 'node:path'
 import * as esbuild from 'esbuild'
 
-interface BuildOptions {
+// Re-export esbuild types for `esbuildOptions`
+export type * as esbuild from 'esbuild'
+
+export interface BuildOptions {
   /**
    * The input file path to bundle.
    */
@@ -164,7 +167,7 @@ function userscriptMetaToString(meta: NonNullable<BuildOptions['userscriptMeta']
 function esbuildCopyOutDirPlugin(copyOutDir: string[], name: string): esbuild.Plugin {
   return {
     name: 'copy-out-dir',
-    setup(build: esbuild.PluginBuild) {
+    setup(build) {
       build.onEnd(async (result) => {
         if (result.errors.length > 0) return
 
